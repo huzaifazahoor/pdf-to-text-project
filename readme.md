@@ -20,7 +20,7 @@ You will also need to install Tesseract OCR on your system. On macOS, this can b
 
 - Update the root_folder and output_folder variables in the Python script to match your input and output directories.
 - Run the Python script with:
-```python3 pdf_to_txt.py```
+```python3 main.py```
 - If you're using macOS, you can use the provided script.sh to automate the process.
 - First, give it execution permissions:
 ```chmod +x ./script.sh```
