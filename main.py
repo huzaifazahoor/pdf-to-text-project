@@ -1,7 +1,7 @@
 import os
-import PyPDF2
-from pdf2image import convert_from_path
+import fitz
 import pytesseract
+from PIL import Image
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,30 +14,35 @@ def convert_pdf_to_txt(path):
     otherwise, the text is extracted directly.
     """
     try:
-        pdf_file = PyPDF2.PdfFileReader(path)
-        text = ""
+        # Open the PDF
+        doc = fitz.open(path)
 
-        # Check if PDF is Encrypted
-        if pdf_file.isEncrypted:
+        # Check if the PDF is encrypted
+        if doc.is_encrypted:
             print(f"The file {path} is encrypted and cannot be processed.")
             return
 
-        # PDF is image-based
-        elif pdf_file.getPage(0).extractText() == "":
-            pages = convert_from_path(path, 500)
+        text = ""
 
-            for page in pages:
-                text += str(pytesseract.image_to_string(page))
+        # Iterate over PDF pages
+        for page in doc:
+            # Try to extract text
+            extracted_text = page.get_text()
+            if extracted_text:  # Text-based PDF
+                text += extracted_text.strip()
+            else:  # Image-based PDF, use OCR
+                pix = page.get_pixmap()
+                img = Image.frombytes(
+                    "RGB",
+                    [pix.width, pix.height],
+                    pix.samples,
+                )
+                text += str(pytesseract.image_to_string(img)).strip()
 
-        # PDF is text-based
-        else:
-            for page_num in range(pdf_file.numPages):
-                page = pdf_file.getPage(page_num)
-                text += page.extractText()
+        return text.strip()
 
-        return text
     except Exception as e:
-        print(f"There was an error processing the file {path}.", e)
+        print(f"There was an error processing the file {path}. Error: {e}")
         return
 
 
@@ -45,13 +50,16 @@ def write_to_txt(text, output_path):
     """
     This function writes the extracted text to a .txt file.
     """
-    with open(output_path, "w") as f:
+    # Ensure the directory exists; if not, create it
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+    with open(output_path, "w", encoding="utf-8") as f:
         f.write(text)
 
 
 def main():
     root_folder = os.getenv("PDF_FOLDER_PATH")
-    output_folder = "output/"
+    output_folder = "./output/"
 
     # Walk through the directory
     for subdir, dirs, files in os.walk(root_folder):
@@ -71,9 +79,10 @@ def main():
                 text = convert_pdf_to_txt(pdf_path)
                 if text:
                     write_to_txt(text, txt_path)
+                    print("Writting", txt_path, "successfully\n\n")
 
                 # Optionally remove the processed PDF
-                # os.remove(pdf_path)
+                os.remove(pdf_path)
 
 
 if __name__ == "__main__":

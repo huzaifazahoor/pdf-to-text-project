@@ -4,12 +4,11 @@ This Python script recursively converts all PDF files in a specified directory t
 
 ## Requirements
 
-- Python 3
-- PyPDF2
-- pdf2image
+- Python3
 - pytesseract
 - PIL (Pillow)
 - python-dotenv
+- PyMuPDF
 
 You can install the required Python libraries using pip:
 
@@ -31,5 +30,5 @@ You will also need to install Tesseract OCR on your system. On macOS, this can b
 ## Notes
 
 - The Python script can be used on any OS, but the shell script is designed for macOS only.
-- The script does not support password-protected PDFs.
+- The script does not support password-protected PDFs. If the PDF is encrypted, it will skip that specific PDF.
 - The script is resource-intensive and may take a long time to process large or complex PDFs.
