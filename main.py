@@ -82,7 +82,7 @@ def main():
                     print("Writting", txt_path, "successfully\n\n")
 
                 # Optionally remove the processed PDF
-                os.remove(pdf_path)
+                # os.remove(pdf_path)
 
 
 if __name__ == "__main__":
